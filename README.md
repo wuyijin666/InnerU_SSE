@@ -1,29 +1,89 @@
-﻿# TODO SSE 通知服务（Golang）
+# InnerU_SSE
 
-简介
-- 这是一个基于 Go 的 SSE（Server-Sent Events）通知示例服务，适合作为 TODO 应用的实时提醒/通知模块。
-- 支持简单 token 认证（通过查询参数 token），支持心跳、Last-Event-ID 协议占位，支持 /notify 广播接口用于测试或后端触发。
+A small TODO server with SSE (Server-Sent Events) notifications and a minimal front-end demo.
 
-快速运行
-1. Go 环境 (1.20+)：
-   go build -o bin/todo-sse.exe
-   .\bin\todo-sse.exe
+## Overview
 
-2. Docker：
-   docker build -t todo-sse:latest .
-   docker run -p 8080:8080 todo-sse:latest
+This project provides:
+- A Go HTTP server that implements a simple TODO API (CRUD) backed by SQLite.
+- SSE endpoint to broadcast changes (todo.created, todo.updated, todo.completed, todo.deleted) to connected clients.
+- A minimal front-end demo at `web/index.html` to connect and view real-time notifications.
 
-接口
-- GET /sse?token=your-token  -> SSE 订阅（浏览器端用 EventSource）
-- POST /notify (JSON body) -> 广播通知到所有已连接客户端
-- GET /notify?msg=xxx -> 简单广播用于快速测试
+## Requirements
 
-示例前端
-- web/index.html 提供了一个演示页面，使用 EventSource 连接并显示消息。
+- Go 1.24+ (development & CI)
+- (Optional) curl or PowerShell for testing
 
-开发说明
-- hub.go 实现了连接管理与广播逻辑，单实例下工作良好。
-- 多实例扩展：建议接入 Redis pub/sub 或 Kafka 作为消息总线。
+## Build
 
-文档
-- DOC.md 包含设计决策、运行与部署说明、AI 使用记录等（请补充）。
+From the project root:
+
+# build executable
+go build -o ./bin/todo-sse.exe
+
+# or run directly
+go run .
+
+## Run
+
+Run in the foreground to see logs:
+
+./bin/todo-sse.exe
+
+The server listens on port 8080 by default. Open http://localhost:8080 in your browser.
+
+## Front-end demo
+
+Open in your browser:
+
+http://localhost:8080/index.html
+
+- Enter a token (for demo use `demo-token`) and click Connect.
+- The page will show connection status and a log area where SSE messages appear.
+
+## API examples (PowerShell)
+
+Use `Invoke-RestMethod` in PowerShell (recommended on Windows). Replace IDs as needed.
+
+# Create
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/todos" -ContentType "application/json" -Body '{"title":"Buy milk","description":"2L"}'
+
+# List
+Invoke-RestMethod -Method Get -Uri "http://localhost:8080/api/todos"
+
+# Update (PUT)
+Invoke-RestMethod -Method Put -Uri "http://localhost:8080/api/todos/1" -ContentType "application/json" -Body '{"title":"Buy milk (2L)","description":"low-fat"}'
+
+# Mark completed (PATCH to /complete)
+Invoke-RestMethod -Method Patch -Uri "http://localhost:8080/api/todos/1/complete" -ContentType "application/json" -Body '{"completed":true}'
+
+# Delete
+Invoke-RestMethod -Method Delete -Uri "http://localhost:8080/api/todos/1"
+
+## Testing SSE from terminal (curl)
+
+# Listen for SSE stream (use curl.exe on Windows)
+curl.exe -N "http://localhost:8080/sse?token=demo-token"
+
+# Then in another terminal, create a todo to see the SSE notification
+curl.exe -X POST -H "Content-Type: application/json" -d '{"title":"Test SSE"}' "http://localhost:8080/api/todos"
+
+
+## Notes and Best Practices
+
+- Do NOT commit built binaries or local database files. Add them to `.gitignore` (see `.gitignore` in repo). If you accidentally committed them, remove from git index with `git rm --cached`.
+- For production use, replace the demo token mechanism with proper authentication and consider a more robust DB (Postgres) or a shared pub/sub broker for multi-instance SSE.
+- The server writes to a local SQLite file; SQLite allows only one concurrent writer — the app config should set `db.SetMaxOpenConns(1)`.
+
+## Development
+
+- Run `gofmt -w .`, `go vet ./...`, and (recommended) `staticcheck ./...`.
+- Run unit tests: `go test ./... -v`.
+
+## Demo script
+
+You can create a small PowerShell demo script to start the server and create a sample todo; see `demo.ps1` (not included). 
+
+## License
+
+MIT
