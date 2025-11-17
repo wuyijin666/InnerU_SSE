@@ -1,0 +1,31 @@
+﻿To: hr@example.com
+Subject: [交付] TODO App（Golang + SSE 实时通知）项目提交 — 投递人 wuyijin666
+
+您好，
+
+我已按约定在 3 天内完成基于 Golang + SSE 的 TODO 应用通知模块实现（基础 TODO 功能在主仓库/分支中，实时通知模块在子目录或者同仓库根路径）。请在此仓库查看项目与演示：
+
+仓库地址：<请替换为实际仓库链接>
+
+主要实现（交付清单）：
+- Golang SSE 服务（/sse 订阅，/notify 广播）
+- 前端 demo（web/index.html）
+- Dockerfile（镜像构建）
+- GitHub Actions CI（build & test）
+- DOC.md（设计与运行说明）
+- README.md（快速运行指南）
+
+交付时间线（3 天）：
+- Day 1：完成 SSE hub、基本 API 与前端 demo（提交）
+- Day 2：完善鉴权示例、心跳、错误处理、测试、CI 配置（提交）
+- Day 3：Docker 化、DOC 完成、优化与最终提交（提交）
+
+演示与运行：
+- 本地：go build && ./todo-sse，打开 http://localhost:8080/index.html
+- Docker：docker build -t todo-sse . && docker run -p 8080:8080 todo-sse
+
+如需我推送到指定仓库并创建 release/提交 PR，请回复我仓库地址或授权；我也可以将当前实现扩展为支持 Redis pub/sub（用于多实例广播）或集成到主 TODO 服务中。
+
+谢谢！
+Best regards,
+wuyijin666

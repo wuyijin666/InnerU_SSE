@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset=""utf-8""/>
+  <title>TODO SSE Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    #log { border: 1px solid #ddd; padding: 8px; height: 200px; overflow:auto; background:#f9f9f9; }
+    button { margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h2>TODO SSE Demo</h2>
+  <div>
+    Token: <input id=""token"" value=""demo-token""/>
+    <button id=""connect"">Connect</button>
+    <button id=""disconnect"">Disconnect</button>
+  </div>
+  <div id=""log""></div>
+  <div style=""margin-top:12px;"">
+    <input id=""msg"" placeholder=""message""/>
+    <button id=""send"">Send (GET /notify?msg=)</button>
+  </div>
+
+  <script>
+    let es;
+    const log = (s) => {
+      const d = document.getElementById('log');
+      d.innerHTML = new Date().toLocaleTimeString() + ' — ' + s + '<br/>' + d.innerHTML;
+    };
+    document.getElementById('connect').onclick = () => {
+      const token = encodeURIComponent(document.getElementById('token').value || 'demo-token');
+      es = new EventSource('/sse?token=' + token);
+      es.onmessage = e => log('message: ' + e.data);
+      es.addEventListener('notification', e => log('notification: ' + e.data));
+      es.onerror = e => log('error or closed');
+      log('connecting...');
+    };
+    document.getElementById('disconnect').onclick = () => {
+      if (es) { es.close(); log('closed'); }
+    };
+    document.getElementById('send').onclick = () => {
+      const msg = encodeURIComponent(document.getElementById('msg').value || 'hello');
+      fetch('/notify?msg=' + msg).then(()=>log('sent ' + msg));
+    };
+  </script>
+</body>
+</html>
