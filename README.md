@@ -1,89 +1,88 @@
 # InnerU_SSE
 
-A small TODO server with SSE (Server-Sent Events) notifications and a minimal front-end demo.
+一个带有SSE（服务器发送事件）通知和简约前端演示的小型TODO服务器。
 
-## Overview
+## 概述
 
-This project provides:
-- A Go HTTP server that implements a simple TODO API (CRUD) backed by SQLite.
-- SSE endpoint to broadcast changes (todo.created, todo.updated, todo.completed, todo.deleted) to connected clients.
-- A minimal front-end demo at `web/index.html` to connect and view real-time notifications.
+本项目提供：
+- 一个使用SQLite作为后端的简单TODO API（CRUD）Go HTTP服务器。
+- SSE端点，用于向连接的客户端广播变更（todo.created, todo.updated, todo.completed, todo.deleted）。
+- 位于 `web/index.html` 的简约前端演示，用于连接和查看实时通知。
 
-## Requirements
+## 环境要求
 
-- Go 1.24+ (development & CI)
-- (Optional) curl or PowerShell for testing
+- Go 1.24+（开发和CI）
+- （可选）curl或PowerShell用于测试
 
-## Build
+## 构建
 
-From the project root:
+从项目根目录执行：
 
-# build executable
+# 构建可执行文件
 go build -o ./bin/todo-sse.exe
 
-# or run directly
+# 或直接运行
 go run .
 
-## Run
+## 运行
 
-Run in the foreground to see logs:
+在前台运行以查看日志：
 
 ./bin/todo-sse.exe
 
-The server listens on port 8080 by default. Open http://localhost:8080 in your browser.
+服务器默认监听8080端口。在浏览器中打开 http://localhost:8080。
 
-## Front-end demo
+## 前端演示
 
-Open in your browser:
+在浏览器中打开：
 
 http://localhost:8080/index.html
 
-- Enter a token (for demo use `demo-token`) and click Connect.
-- The page will show connection status and a log area where SSE messages appear.
+- 输入令牌（演示使用 `demo-token`）并点击连接。
+- 页面将显示连接状态和SSE消息出现的日志区域。
 
-## API examples (PowerShell)
+## API示例（PowerShell）
 
-Use `Invoke-RestMethod` in PowerShell (recommended on Windows). Replace IDs as needed.
+在PowerShell中使用 `Invoke-RestMethod`（推荐在Windows上使用）。根据需要替换ID。
 
-# Create
-Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/todos" -ContentType "application/json" -Body '{"title":"Buy milk","description":"2L"}'
+# 创建
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/todos" -ContentType "application/json" -Body '{"title":"买牛奶","description":"2L"}'
 
-# List
+# 列表
 Invoke-RestMethod -Method Get -Uri "http://localhost:8080/api/todos"
 
-# Update (PUT)
-Invoke-RestMethod -Method Put -Uri "http://localhost:8080/api/todos/1" -ContentType "application/json" -Body '{"title":"Buy milk (2L)","description":"low-fat"}'
+# 更新（PUT）
+Invoke-RestMethod -Method Put -Uri "http://localhost:8080/api/todos/1" -ContentType "application/json" -Body '{"title":"买牛奶（2L）","description":"低脂"}'
 
-# Mark completed (PATCH to /complete)
+# 标记完成（PATCH到/complete）
 Invoke-RestMethod -Method Patch -Uri "http://localhost:8080/api/todos/1/complete" -ContentType "application/json" -Body '{"completed":true}'
 
-# Delete
+# 删除
 Invoke-RestMethod -Method Delete -Uri "http://localhost:8080/api/todos/1"
 
-## Testing SSE from terminal (curl)
+## 从终端测试SSE（curl）
 
-# Listen for SSE stream (use curl.exe on Windows)
+# 监听SSE流（在Windows上使用curl.exe）
 curl.exe -N "http://localhost:8080/sse?token=demo-token"
 
-# Then in another terminal, create a todo to see the SSE notification
-curl.exe -X POST -H "Content-Type: application/json" -d '{"title":"Test SSE"}' "http://localhost:8080/api/todos"
+# 然后在另一个终端中，创建一个todo以查看SSE通知
+curl.exe -X POST -H "Content-Type: application/json" -d '{"title":"测试SSE"}' "http://localhost:8080/api/todos"
 
+## 注意事项和最佳实践
 
-## Notes and Best Practices
+- 不要提交构建的二进制文件或本地数据库文件。将它们添加到 `.gitignore`（参见仓库中的 `.gitignore`）。如果不小心提交了，请使用 `git rm --cached` 从git索引中删除。
+- 生产环境使用时，将演示令牌机制替换为适当的身份验证，并考虑使用更健壮的数据库（Postgres）或共享的发布/订阅代理来实现多实例SSE。
+- 服务器写入本地SQLite文件；SQLite只允许一个并发写入者——应用程序配置应设置 `db.SetMaxOpenConns(1)`。
 
-- Do NOT commit built binaries or local database files. Add them to `.gitignore` (see `.gitignore` in repo). If you accidentally committed them, remove from git index with `git rm --cached`.
-- For production use, replace the demo token mechanism with proper authentication and consider a more robust DB (Postgres) or a shared pub/sub broker for multi-instance SSE.
-- The server writes to a local SQLite file; SQLite allows only one concurrent writer — the app config should set `db.SetMaxOpenConns(1)`.
+## 开发
 
-## Development
+- 运行 `gofmt -w .`、`go vet ./...` 和（推荐）`staticcheck ./...`。
+- 运行单元测试：`go test ./... -v`。
 
-- Run `gofmt -w .`, `go vet ./...`, and (recommended) `staticcheck ./...`.
-- Run unit tests: `go test ./... -v`.
+## 演示脚本
 
-## Demo script
+您可以创建一个小的PowerShell演示脚本来启动服务器并创建示例todo；参见 `demo.ps1`（未包含）。
 
-You can create a small PowerShell demo script to start the server and create a sample todo; see `demo.ps1` (not included). 
-
-## License
+## 许可证
 
 MIT
