@@ -14,16 +14,6 @@
 - Go 1.24+（开发和CI）
 - （可选）curl或PowerShell用于测试
 
-## 构建
-
-从项目根目录执行：
-
-# 构建可执行文件
-go build -o ./bin/todo-sse.exe
-
-# 或直接运行
-go run .
-
 ## 运行
 
 在前台运行以查看日志：
